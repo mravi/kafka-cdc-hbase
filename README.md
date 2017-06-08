@@ -5,6 +5,7 @@ I have the source connector implementation available at https://github.com/mravi
 
 ## Pre-requisites
 * Confluent 3.2.x
+* Kafka 0.10.2.x
 * HBase 1.3.0
 * JDK 1.8
 
@@ -13,7 +14,7 @@ I have the source connector implementation available at https://github.com/mravi
 * Each Kafka topic is mapped to a HBase table.
 
 
-## Properties
+## Properties 
 
 Below are the properties that need to be passed in the configuration file:
 
