@@ -4,8 +4,8 @@ A Sink connector to write to HBase.
 I have the source connector implementation available at https://github.com/mravi/hbase-connect-kafka
 
 ## Pre-requisites
-* Confluent 2.0
-* HBase 1.0.0
+* Confluent 3.2.x
+* HBase 1.3.0
 * JDK 1.8
 
 ## Assumptions
@@ -20,6 +20,7 @@ Below are the properties that need to be passed in the configuration file:
 name | data type | required | description
 -----|-----------|----------|------------
 zookeeper.quorum | string | yes | Zookeeper quorum of the HBase cluster
+zookeeper.znode.parent | string | yes | Zookeeper parent znode of the HBase cluster [default is /hbase]
 event.parser.class | string | yes | Can be either AvroEventParser or JsonEventParser to parse avro or json events respectively.
 topics | string | yes | list of kafka topics.
 hbase.`<topicname>`.rowkey.columns | string | yes | The columns that represent the rowkey of the hbase table `<topicname>`
