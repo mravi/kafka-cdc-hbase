@@ -17,14 +17,17 @@
  */
 package io.svectors.hbase.sink;
 
-import static io.svectors.hbase.sink.HbaseTestUtil.startMiniCluster;
-import static io.svectors.hbase.sink.HbaseTestUtil.stopMiniCluster;
 import static io.svectors.hbase.sink.HbaseTestUtil.createTable;
 import static io.svectors.hbase.sink.HbaseTestUtil.getUtility;
+import static io.svectors.hbase.sink.HbaseTestUtil.startMiniCluster;
+import static io.svectors.hbase.sink.HbaseTestUtil.stopMiniCluster;
 
-import io.svectors.hbase.config.HBaseSinkConfig;
-import io.svectors.hbase.parser.AvroEventParser;
-import io.svectors.hbase.parser.JsonEventParser;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -37,20 +40,16 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
-import org.apache.kafka.connect.runtime.ConnectorConfig;
+import org.apache.kafka.connect.runtime.SinkConnectorConfig;
 import org.apache.kafka.connect.sink.SinkRecord;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import io.svectors.hbase.config.HBaseSinkConfig;
+import io.svectors.hbase.parser.AvroEventParser;
+import io.svectors.hbase.parser.JsonEventParser;
 
 
 /**
@@ -76,7 +75,7 @@ public class TestHbaseSinkTask {
         configProps.put("hbase.test.rowkey.columns", "id");
         configProps.put("hbase.test.rowkey.delimiter", "|");
         configProps.put("hbase.test.family", columnFamily);
-        configProps.put(ConnectorConfig.TOPICS_CONFIG, hbaseTable);
+        configProps.put(SinkConnectorConfig.TOPICS_CONFIG, hbaseTable);
         configProps.put(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG, TO_LOCAL_URI.apply(getUtility().getZkCluster()
           .getClientPort()));
     }
