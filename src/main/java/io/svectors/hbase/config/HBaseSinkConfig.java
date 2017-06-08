@@ -17,14 +17,16 @@
  */
 package io.svectors.hbase.config;
 
-import com.google.common.base.Preconditions;
-import io.svectors.hbase.parser.EventParser;
+import java.util.Map;
+
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
-import org.apache.kafka.connect.runtime.ConnectorConfig;
+import org.apache.kafka.connect.runtime.SinkConnectorConfig;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+
+import io.svectors.hbase.parser.EventParser;
 
 /**
  * @author ravi.magham
@@ -33,6 +35,7 @@ public class HBaseSinkConfig extends AbstractConfig {
 
     public static final String ZOOKEEPER_QUORUM_CONFIG = "zookeeper.quorum";
     public static final String EVENT_PARSER_CONFIG = "event.parser.class";
+    public static final String ZOOKEEPER_ZNODE_PARENT = "zookeeper.znode.parent"; 
     public static String DEFAULT_HBASE_ROWKEY_DELIMITER = ",";
     public static String DEFAULT_HBASE_COLUMN_FAMILY = "d";
 
@@ -45,7 +48,7 @@ public class HBaseSinkConfig extends AbstractConfig {
     public static final String TABLE_ROWKEY_DELIMITER_TEMPLATE = "hbase.%s.rowkey.delimiter";
     public static final String TABLE_COLUMN_FAMILY_TEMPLATE = "hbase.%s.family";
 
-    private static ConfigDef CONFIG = new ConfigDef();
+    public static ConfigDef CONFIG = new ConfigDef();
     private Map<String, String> properties;
 
     static {
@@ -55,7 +58,9 @@ public class HBaseSinkConfig extends AbstractConfig {
 
         CONFIG.define(EVENT_PARSER_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "Event parser class " +
           "to parse the SinkRecord");
-
+        
+        CONFIG.define(ZOOKEEPER_ZNODE_PARENT, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "HBase parent znode " +
+                "default is /hbase");
     }
 
     public HBaseSinkConfig(Map<String, String> originals) {
@@ -71,7 +76,7 @@ public class HBaseSinkConfig extends AbstractConfig {
      * Validates the properties to ensure the rowkey property is configured for each table.
      */
     public void validate() {
-        final String topicsAsStr = properties.get(ConnectorConfig.TOPICS_CONFIG);
+        final String topicsAsStr = properties.get(SinkConnectorConfig.TOPICS_CONFIG);
         final String[] topics = topicsAsStr.split(",");
         for(String topic : topics) {
             String key = String.format(TABLE_ROWKEY_COLUMNS_TEMPLATE, topic);

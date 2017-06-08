@@ -73,6 +73,8 @@ public class AvroEventParser implements EventParser {
         final Schema.Type type = field.schema().type();
         final String fieldName = field.name();
         final Object fieldValue = record.get(fieldName);
+       // System.out.println("fieldValue === "+ (fieldValue != null ? fieldValue : " null field value for "+fieldName));
+        if(fieldValue != null){
         switch (type) {
             case STRING:
                 return Bytes.toBytes((String) fieldValue);
@@ -95,5 +97,6 @@ public class AvroEventParser implements EventParser {
             default:
                 return null;
         }
+        }return null;
     }
 }
