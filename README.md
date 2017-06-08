@@ -35,6 +35,7 @@ connector.class=io.svectors.hbase.sink.HBaseSinkConnector
 tasks.max=1
 topics=test
 zookeeper.quorum=localhost:2181
+zookeeper.znode.parent=/hbase
 event.parser.class=io.svectors.hbase.parser.AvroEventParser
 hbase.test.rowkey.columns=id
 hbase.test.rowkey.delimiter=|
