@@ -73,30 +73,31 @@ public class AvroEventParser implements EventParser {
         final Schema.Type type = field.schema().type();
         final String fieldName = field.name();
         final Object fieldValue = record.get(fieldName);
-       // System.out.println("fieldValue === "+ (fieldValue != null ? fieldValue : " null field value for "+fieldName));
-        if(fieldValue != null){
-        switch (type) {
-            case STRING:
-                return Bytes.toBytes((String) fieldValue);
-            case BOOLEAN:
-                return Bytes.toBytes((Boolean)fieldValue);
-            case BYTES:
-                return Bytes.toBytes((ByteBuffer) fieldValue);
-            case FLOAT32:
-                return Bytes.toBytes((Float)fieldValue);
-            case FLOAT64:
-                return Bytes.toBytes((Double)fieldValue);
-            case INT8:
-                return Bytes.toBytes((Byte)fieldValue);
-            case INT16:
-                return Bytes.toBytes((Short)fieldValue);
-            case INT32:
-                return Bytes.toBytes((Integer)fieldValue);
-            case INT64:
-                return Bytes.toBytes((Long)fieldValue);
-            default:
-                return null;
-        }
-        }return null;
+        //Skip data type binding if value is null
+	    if(fieldValue != null){
+	        switch (type) {
+	            case STRING:
+	                return Bytes.toBytes((String) fieldValue);
+	            case BOOLEAN:
+	                return Bytes.toBytes((Boolean)fieldValue);
+	            case BYTES:
+	                return Bytes.toBytes((ByteBuffer) fieldValue);
+	            case FLOAT32:
+	                return Bytes.toBytes((Float)fieldValue);
+	            case FLOAT64:
+	                return Bytes.toBytes((Double)fieldValue);
+	            case INT8:
+	                return Bytes.toBytes((Integer)fieldValue);
+	            case INT16:
+	                return Bytes.toBytes((Integer)fieldValue);
+	            case INT32:
+	                return Bytes.toBytes((Integer)fieldValue);
+	            case INT64:
+	                return Bytes.toBytes((Long)fieldValue);
+	            default:
+	                return null;
+	        }
+	    }
+	   return null;
     }
 }
