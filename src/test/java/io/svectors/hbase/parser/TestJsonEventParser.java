@@ -17,16 +17,14 @@
  */
 package io.svectors.hbase.parser;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * @author ravi.magham
@@ -42,25 +40,18 @@ public class TestJsonEventParser {
 
     @Test
     public void testParseValue() {
-        final Schema valueSchema = SchemaBuilder.struct().name("record").version(1)
-          .field("url", Schema.STRING_SCHEMA)
-          .field("id", Schema.INT32_SCHEMA)
-          .field("zipcode", Schema.INT32_SCHEMA)
-          .field("status", Schema.BOOLEAN_SCHEMA)
-          .build();
-
+       
         String url = "google.com";
         int id = 1;
         int zipcode = 95051;
         boolean status = true;
 
-        final Struct record = new Struct(valueSchema)
-          .put("url", url)
-          .put("id", id)
-          .put("zipcode", zipcode)
-          .put("status", status);
-
-        final SinkRecord sinkRecord = new SinkRecord("test", 0, null, null, valueSchema, record, 0);
+        final HashMap<String, Object> record = new HashMap<String, Object>();
+        record.put("url", url);
+        record.put("id", id);
+        record.put("zipcode", zipcode);
+        record.put("status", status);
+        final SinkRecord sinkRecord = new SinkRecord("test", 0, null, null, null, record, 0);
 
         Map<String, byte[]> result = eventParser.parseValue(sinkRecord);
         Assert.assertEquals(4, result.size());

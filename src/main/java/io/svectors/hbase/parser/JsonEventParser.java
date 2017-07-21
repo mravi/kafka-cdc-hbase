@@ -17,32 +17,35 @@
  */
 package io.svectors.hbase.parser;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.google.common.base.Preconditions;
-import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.json.JsonConverter;
-import org.apache.kafka.connect.sink.SinkRecord;
-
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.kafka.connect.json.JsonConverter;
+import org.apache.kafka.connect.sink.SinkRecord;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.google.common.base.Preconditions;
+import com.google.gson.Gson;
+
 /**
  * Parses a json event.
  * @author ravi.magham
+ * @author Dev Anand 
  */
 public class JsonEventParser implements EventParser {
 
     private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final static ObjectReader JSON_READER = OBJECT_MAPPER.reader(JsonNode.class);
+    
+    private final static Gson gson = new Gson();
 
     private final JsonConverter keyConverter;
     private final JsonConverter valueConverter;
@@ -64,12 +67,12 @@ public class JsonEventParser implements EventParser {
 
     @Override
     public Map<String, byte[]> parseKey(SinkRecord sr) throws EventParsingException {
-        return this.parse(sr.topic(), sr.keySchema(), sr.key(), true);
+        return this.parse(sr.topic(), sr.key(), true);
     }
 
     @Override
     public Map<String, byte[]> parseValue(SinkRecord sr) throws EventParsingException {
-        return this.parse(sr.topic(), sr.valueSchema(), sr.value(), false);
+        return this.parse(sr.topic(), sr.value(), false);
     }
 
     /**
@@ -80,15 +83,15 @@ public class JsonEventParser implements EventParser {
      * @return
      * @throws EventParsingException
      */
-    public Map<String, byte[]> parse(final String topic, final Schema schema, final Object value, final boolean isKey)
+    public Map<String, byte[]> parse(final String topic, final Object value, final boolean isKey)
         throws EventParsingException {
         final Map<String, byte[]> values = new LinkedHashMap<>();
         try {
             byte[] valueBytes = null;
             if(isKey) {
-                valueBytes = keyConverter.fromConnectData(topic, schema, value);
+                valueBytes = keyConverter.fromConnectData(topic, null, value);
             } else {
-                valueBytes = valueConverter.fromConnectData(topic, schema, value);
+                valueBytes = valueConverter.fromConnectData(topic, null, value);
             }
             if(valueBytes == null || valueBytes.length == 0) {
                 return Collections.emptyMap();
@@ -98,18 +101,20 @@ public class JsonEventParser implements EventParser {
             final Map<String, Object> keyValues = OBJECT_MAPPER.convertValue(valueNode,
               new TypeReference<Map<String, Object>>() {});
 
-            final List<Field> fields = schema.fields();
-            for(Field field : fields) {
-                final byte[] fieldValue = toValue(keyValues, field);
+            final List<String> keys = new ArrayList<String>();
+            keys.addAll(keyValues.keySet());
+            for(String key : keys) {
+                final byte[] fieldValue = toValue(keyValues, key);
                 if(fieldValue == null) {
                     continue;
                 }
-                values.put(field.name(), fieldValue);
+                values.put(key, fieldValue);
             }
             return values;
         } catch (Exception ex) {
-            final String errorMsg = String.format("Failed to parse the schema [%s] , value [%s] with ex [%s]" ,
-               schema, value, ex.getMessage());
+            final String errorMsg = String.format("Failed to parse [%s] with ex [%s]" ,
+                    value, ex.getMessage());
+            
             throw new EventParsingException(errorMsg, ex);
         }
     }
@@ -120,32 +125,30 @@ public class JsonEventParser implements EventParser {
      * @param field
      * @return
      */
-    private byte[] toValue(final Map<String, Object> keyValues, final Field field) {
-        Preconditions.checkNotNull(field);
-        final Schema.Type type = field.schema().type();
-        final String fieldName = field.name();
-        final Object fieldValue = keyValues.get(fieldName);
-        switch (type) {
-            case STRING:
-                return Bytes.toBytes((String) fieldValue);
-            case BOOLEAN:
-                return Bytes.toBytes((Boolean)fieldValue);
-            case BYTES:
-                return Bytes.toBytes((ByteBuffer) fieldValue);
-            case FLOAT32:
-                return Bytes.toBytes((Float)fieldValue);
-            case FLOAT64:
-                return Bytes.toBytes((Double)fieldValue);
-            case INT8:
-                return Bytes.toBytes((Byte)fieldValue);
-            case INT16:
-                return Bytes.toBytes((Short)fieldValue);
-            case INT32:
-                return Bytes.toBytes((Integer)fieldValue);
-            case INT64:
-                return Bytes.toBytes((Long)fieldValue);
-            default:
-                return null;
-        }
+    private byte[] toValue(final Map<String, Object> keyValues, final String field) {
+        Preconditions.checkNotNull(field);     
+       
+       final Object fieldValue = keyValues.get(field);
+       if (fieldValue instanceof String) {
+           return ((String)fieldValue).getBytes();
+       } else if (fieldValue instanceof Integer) {
+           return Bytes.toBytes((Integer)fieldValue);
+       } else if (fieldValue instanceof Double) {
+           return Bytes.toBytes((Double)fieldValue);
+       } else if (fieldValue instanceof Long) {
+           return Bytes.toBytes((Long)fieldValue);
+       } else if (fieldValue instanceof Boolean) {
+           return Bytes.toBytes((Boolean)fieldValue);
+       } else if (fieldValue instanceof Map) {
+           String jsonString = gson.toJson(fieldValue);
+           return jsonString.getBytes();
+       } else if (fieldValue instanceof List) {
+           String jsonString = gson.toJson(fieldValue);
+           return jsonString.getBytes();
+       } else {
+           final String errorMsg = String.format("Unable to parse [%s] of type [%s]" ,
+                   field, fieldValue.getClass());
+           throw new EventParsingException(errorMsg);
+       }
     }
 }
