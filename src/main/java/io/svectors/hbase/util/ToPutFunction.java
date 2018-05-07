@@ -17,26 +17,28 @@
  */
 package io.svectors.hbase.util;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-
-import io.svectors.hbase.parser.EventParser;
-import io.svectors.hbase.config.HBaseSinkConfig;
+import java.util.Map;
 
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.kafka.connect.sink.SinkRecord;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
+
+import io.svectors.hbase.config.HBaseSinkConfig;
+import io.svectors.hbase.parser.EventParser;
 
 
 /**
  * @author ravi.magham
  */
-public class ToPutFunction implements Function<SinkRecord, Put> {
-
+public class ToPutFunction implements Function<SinkRecord, Put>{
+    final static Logger logger = LoggerFactory.getLogger(ToPutFunction.class);
     private final HBaseSinkConfig sinkConfig;
     private final EventParser eventParser;
-
     public ToPutFunction(HBaseSinkConfig sinkConfig) {
         this.sinkConfig = sinkConfig;
         this.eventParser = sinkConfig.eventParser();
@@ -68,6 +70,9 @@ public class ToPutFunction implements Function<SinkRecord, Put> {
         valuesMap.entrySet().stream().forEach(entry -> {
             final String qualifier = entry.getKey();
             final byte[] value = entry.getValue();
+            if (qualifier.equals("_id")) {
+            logger.info("Arrived new hbase record with _id: "+new String(value));
+            }
             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
         });
         return put;

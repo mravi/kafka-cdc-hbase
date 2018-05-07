@@ -17,22 +17,21 @@
  */
 package io.svectors.hbase.util;
 
-import io.svectors.hbase.config.HBaseSinkConfig;
-import io.svectors.hbase.parser.JsonEventParser;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import io.svectors.hbase.config.HBaseSinkConfig;
+import io.svectors.hbase.parser.JsonEventParser;
 
 /**
  * @author ravi.magham
+ * @author dev.anand 20170731
  */
 public class TestToPutFunction {
 
@@ -43,21 +42,19 @@ public class TestToPutFunction {
         configProps.put("hbase.test.rowkey.columns", "id");
         configProps.put(HBaseSinkConfig.EVENT_PARSER_CONFIG, JsonEventParser.class.getName());
         final ToPutFunction toPutFunction = new ToPutFunction(new HBaseSinkConfig(configProps));
+        
+        String url = "google.com";
+        int id = 123456;
+        int zipcode = 95051;
+        boolean status = true;
 
-        final Schema schema = SchemaBuilder.struct().name("record").version(1)
-          .field("url", Schema.STRING_SCHEMA)
-          .field("id", Schema.INT32_SCHEMA)
-          .field("zipcode", Schema.INT32_SCHEMA)
-          .field("status", Schema.BOOLEAN_SCHEMA)
-          .build();
+        final HashMap<String, Object> record = new HashMap<String, Object>();
+        record.put("url", url);
+        record.put("id", id);
+        record.put("zipcode", zipcode);
+        record.put("status", status);
+        final SinkRecord sinkRecord = new SinkRecord("test", 0, null, null, null, record, 0);
 
-        final Struct record = new Struct(schema)
-          .put("url", "google.com")
-          .put("id", 123456)
-          .put("zipcode", 95051)
-          .put("status", true);
-
-        final SinkRecord sinkRecord = new SinkRecord("test", 0, null, null, schema, record, 0);
         final Put put =  toPutFunction.apply(sinkRecord);
         Assert.assertEquals(123456, Bytes.toInt(put.getRow()));
     }

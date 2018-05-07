@@ -17,20 +17,24 @@
  */
 package io.svectors.hbase.config;
 
-import com.google.common.base.Preconditions;
-import io.svectors.hbase.parser.EventParser;
+import java.util.Map;
+
 import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigException;
-import org.apache.kafka.connect.runtime.ConnectorConfig;
+import org.apache.kafka.connect.sink.SinkTask;
+import org.eclipse.jetty.util.StringUtil;
+import org.apache.log4j.Logger;
 
-import java.util.Map;
+import com.google.common.base.Preconditions;
+
+import io.svectors.hbase.parser.EventParser;
 
 /**
  * @author ravi.magham
  */
 public class HBaseSinkConfig extends AbstractConfig {
-
+    final static Logger logger = Logger.getLogger(HBaseSinkConfig.class);
     public static final String ZOOKEEPER_QUORUM_CONFIG = "zookeeper.quorum";
     public static final String EVENT_PARSER_CONFIG = "event.parser.class";
     public static String DEFAULT_HBASE_ROWKEY_DELIMITER = ",";
@@ -51,10 +55,10 @@ public class HBaseSinkConfig extends AbstractConfig {
     static {
 
         CONFIG.define(ZOOKEEPER_QUORUM_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "Zookeeper quorum " +
-          "of the hbase cluster");
+                "of the hbase cluster");
 
         CONFIG.define(EVENT_PARSER_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "Event parser class " +
-          "to parse the SinkRecord");
+                "to parse the SinkRecord");
 
     }
 
@@ -70,14 +74,25 @@ public class HBaseSinkConfig extends AbstractConfig {
     /**
      * Validates the properties to ensure the rowkey property is configured for each table.
      */
-    public void validate() {
-        final String topicsAsStr = properties.get(ConnectorConfig.TOPICS_CONFIG);
+    public void  validate() {
+        //enrich this
+        final String topicsAsStr = properties.get(SinkTask.TOPICS_CONFIG);
         final String[] topics = topicsAsStr.split(",");
-        for(String topic : topics) {
+        for (String topic : topics) {
             String key = String.format(TABLE_ROWKEY_COLUMNS_TEMPLATE, topic);
             if(!properties.containsKey(key)) {
                 throw new ConfigException(String.format(" No rowkey has been configured for table [%s]", key));
             }
+        }
+        final String zookeeperQuorum = properties.get(ZOOKEEPER_QUORUM_CONFIG);
+        if (StringUtil.isBlank(zookeeperQuorum)) {
+            logger.info("ZOOKEEPER_QUORUM_CONFIG cannot be null or empty");
+            throw new ConfigException(String.format(zookeeperQuorum+" Empty or Null"));
+        }
+        final String name = properties.get("name");
+        if (StringUtil.isBlank(name)) {
+            logger.error("Name cannot be null or empty");
+            throw new ConfigException(String.format(name+" Empty or Null"));
         }
     }
 

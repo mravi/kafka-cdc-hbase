@@ -25,6 +25,7 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -36,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author ravi.magham
  */
 public abstract class HbaseTestUtil {
-
+    final static Logger logger = Logger.getLogger(HbaseTestUtil.class);
     /* status of the cluster */
     private static AtomicBoolean status = new AtomicBoolean();
     private static AtomicReference<HBaseTestingUtility> utility = new AtomicReference<>();
@@ -98,6 +99,7 @@ public abstract class HbaseTestUtil {
      * @return
      */
     public static void createTable(String tableName, String... columnFamilies) {
+      
         HBaseTestingUtility testingUtility = getUtility();
         if (!status.get()) {
             throw new RuntimeException("The mini cluster hasn't started yet. " +
