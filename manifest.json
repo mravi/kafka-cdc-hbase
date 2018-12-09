@@ -1,0 +1,56 @@
+{
+  "component_types": [
+    "sink"
+  ],
+
+  "description": "This is a connector for getting data out of Apache Kafka into HBase.\nIt is built off of the Kafka Connect framework.",
+
+  "documentation_url": "https://github.com/nishutayal/kafka-connect-hbase/blob/master/README.md",
+
+  "features": {
+    "confluent_control_center_integration": true,
+    "delivery_guarantee": ["at_least_once"],
+    "kafka_connect_api": true,
+    "single_message_transforms": true,
+    "supported_encodings": ["any"]
+  },
+
+  "license": [
+    {
+      "name": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0",
+      "logo": "assets/apache_logo.gif"
+    }
+  ],
+
+  "logo": "assets/elastic_logo.png",
+
+  "name": "kafka-connect-elasticsearch",
+
+  "owner": {
+    "logo": "assets/confluent_logo.jpg",
+    "name": "Confluent, Inc.",
+    "type": "organization",
+    "url": "https://confluent.io/",
+    "username": "confluentinc"
+  },
+
+  "requirements": [
+    "Elasticsearch 5.x"
+  ],
+
+  "support": {
+    "logo": "assets/confluent_logo.jpg",
+    "provider_name": "Confluent, Inc.",
+    "summary": "We provide full support for this connector, alongside community members who contribute to it as an open-source project.",
+    "url": "https://confluent.io/"
+  },
+
+  "tags": [
+    "hbase",
+  ],
+
+  "title": "Kafka Connect HBase",
+
+  "version": "3.3.2"
+}

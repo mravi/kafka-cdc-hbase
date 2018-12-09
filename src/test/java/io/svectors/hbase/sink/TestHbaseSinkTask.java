@@ -76,7 +76,7 @@ public class TestHbaseSinkTask {
         configProps.put("hbase.test.rowkey.columns", "id");
         configProps.put("hbase.test.rowkey.delimiter", "|");
         configProps.put("hbase.test.family", columnFamily);
-        configProps.put(ConnectorConfig.TOPICS_CONFIG, hbaseTable);
+        configProps.put("topics", hbaseTable);
         configProps.put(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG, TO_LOCAL_URI.apply(getUtility().getZkCluster()
           .getClientPort()));
     }

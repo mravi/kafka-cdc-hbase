@@ -41,6 +41,7 @@ public class TestToPutFunction {
         final Map<String, String> configProps = new HashMap<>();
         configProps.put(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG, "localhost");
         configProps.put("hbase.test.rowkey.columns", "id");
+        configProps.put("hbase.test.d.columns", "d1,d2");
         configProps.put(HBaseSinkConfig.EVENT_PARSER_CONFIG, JsonEventParser.class.getName());
         final ToPutFunction toPutFunction = new ToPutFunction(new HBaseSinkConfig(configProps));
 
