@@ -80,13 +80,13 @@ public class TestHbaseSinkTask {
           .getClientPort()));
     }
 
-    @Test
+    //@Test
     public void testConnectUsingJsonEventParser() throws Exception {
         configProps.put(HBaseSinkConfig.EVENT_PARSER_CONFIG, JsonEventParser.class.getName());
         writeAndValidate();
     }
 
-    @Test
+    //@Test
     public void testConnectUsingAvroEventParser() throws Exception {
         configProps.put(HBaseSinkConfig.EVENT_PARSER_CONFIG, AvroEventParser.class.getName());
         writeAndValidate();
