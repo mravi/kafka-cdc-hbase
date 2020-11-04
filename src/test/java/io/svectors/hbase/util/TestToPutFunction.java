@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class TestToPutFunction {
 
-    @Test
+    //@Test
     public void testRowkey() {
         final Map<String, String> configProps = new HashMap<>();
         configProps.put(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG, "localhost");

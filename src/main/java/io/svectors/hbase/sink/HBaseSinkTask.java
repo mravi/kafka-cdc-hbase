@@ -59,8 +59,11 @@ public class HBaseSinkTask extends SinkTask {
         sinkConfig.validate(); // we need to do some sanity checks of the properties we configure.
 
         final String zookeeperQuorum = sinkConfig.getString(HBaseSinkConfig.ZOOKEEPER_QUORUM_CONFIG);
+        final String znodeParent = sinkConfig.getString(HBaseSinkConfig.ZOOKEEPER_ZNODE_PARENT);
         final Configuration configuration = HBaseConfiguration.create();
         configuration.set(HConstants.ZOOKEEPER_QUORUM, zookeeperQuorum);
+        configuration.set(HConstants.ZOOKEEPER_ZNODE_PARENT,znodeParent);//"/hbase-unsecure"
+        
 
         final HBaseConnectionFactory connectionFactory = new HBaseConnectionFactory(configuration);
         this.hBaseClient = new HBaseClient(connectionFactory);
